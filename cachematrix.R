@@ -1,15 +1,52 @@
-## Put comments here that give an overall description of what your
-## functions do
+## Matrix inversion is a potentially costly computation.
+## makeCacheMatrix creates a matrix with cached inverse attribute
+## and cacheSolve efficiently solves matrixes by utilizing cache if inverse
+## matrix is already computed.
+##
+## Functions assume that matrix is invertible.
 
-## Write a short comment describing this function
-
+## makeCacheMatrix
+##
+## Description
+## Wraps matrix object to support cache for inverse computation
+##
+## Parameters
+## x Matrix object to be wrapped. Default value: Empty matrix
 makeCacheMatrix <- function(x = matrix()) {
-
+    i   <- NULL
+    get <- function() x
+    set <- function(y) {
+        # <<- searches x and y from parent environments instead of defining new variables
+        x <<- y
+        i <<- NULL
+    }
+    
+    getinverse <- function() i
+    setinverse <- function(inverse) i <<- inverse
+    list(set = set, get = get,
+         setinverse = setinverse, getinverse= getinverse)
 }
 
-
-## Write a short comment describing this function
-
+## cacheSolve
+##
+## Description
+## Solve matrix using cached result, if available. Otherwise, compute
+## inverse using 'solve' function and cache the result.
+##
+## Parameters
+## x    cacheMatrix to solve
+## ...  Extra parameters passed to 'solve' function
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+    i <- x$getinverse()
+    
+    if(!is.null(i)) {
+        message("getting cached data")
+        return(i)
+    }
+    
+    data <- x$get()
+    i    <- solve(data, ...)
+    
+    x$setinverse(i)
+    i
 }
